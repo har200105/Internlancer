@@ -11,9 +11,9 @@ import os
 
 
 class JobType(models.TextChoices):
-    FullTime = 'Full Time'
+    FullTime = 'Permanent'
     Internship = 'Internship'
-    Freelancing = 'FreeLancing'
+    Freelancing = 'Freelancing'
 
 
 class Education(models.TextChoices):
@@ -61,15 +61,15 @@ class Job(models.Model):
     positions = models.IntegerField(default=1)
     company = models.CharField(max_length=100, null=True)
     point = gismodels.PointField(default=Point(0.0, 0.0))
-    lastDate = models.DateField(default=Getdatetime)
+    lastDate = models.DateTimeField(default=Getdatetime)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     createdAt = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        g = geocoder.mapquest(self.address, key=os.environ.get('GEOCODER_KEY'))
-        print(g)
-        self.point = Point(g.lng, g.lat)
-        super(Job, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     g = geocoder.mapquest(self.address, key=os.environ.get('GEOCODER_KEY'))
+    #     print(g)
+    #     self.point = Point(g.lng, g.lat)
+    #     super(Job, self).save(*args, **kwargs)
 
 
 class CandidatesApplied(models.Model):

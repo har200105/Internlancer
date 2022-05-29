@@ -3,9 +3,9 @@ from .models import CandidatesApplied, Job
 
 
 class JobSerializer(serializers.ModelSerializer):
-    class Metas:
+    class Meta:
         model = Job
-        feilds = '__all__'
+        fields = '__all__'
         # fields = ['name','description']
         # exclude
 

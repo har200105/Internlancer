@@ -5,48 +5,47 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from job.filters import JobFilters
 from rest_framework import status
-
 from rest_framework.pagination import PageNumberPagination
-
 from rest_framework.permissions import IsAuthenticated
-
-
 from job.serializers import CandidatesAppliedSerializer, JobSerializer
 from .models import CandidatesApplied, Job
-
 from django.db.models import Max, Min, Avg, Count
 
 
 @api_view(['GET'])
 def getAllJobs(request):
-
     # jobs = Job.objects.all()
+    print('get all')
     filterset = JobFilters(
         request.GET, queryset=Job.objects.all().order_by('id'))
-
     resPerPage = 3
-
     paginator = PageNumberPagination()
     paginator.page_size = resPerPage
-
+    count = filterset.qs.count()
     queryset = paginator.paginate_queryset(filterset.qs, request)
-
     serializer = JobSerializer(queryset, many=True)
-    return Response(serializer.data)
+    print(serializer.data)
+    return Response({"count": count,
+                     "resPerPage": resPerPage,
+                     'jobs': serializer.data})
 
 
 @api_view(['GET'])
 def getJobById(request, pk):
     # job = Job.objects.get(id=pk)
     job = get_object_or_404(Job, id=pk)
+    candidates = job.candidatesapplied_set.all().count()
     serializer = JobSerializer(job, many=False)
-    return Response(serializer.data)
+    return Response({'job': serializer.data, 'candidates': candidates})
 
 
 @api_view(['POST'])
 def newJob(request):
+    print(".........")
+    print(request.data)
+    request.data['user'] = request.user
     data = request.data
-    job = Job.objects.create(data)
+    job = Job.objects.create(**data)
     serializer = JobSerializer(job, many=False)
     return Response(serializer.data)
 
@@ -112,27 +111,54 @@ def applyToJob(request, pk):
     }, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def applyToJob(request):
+def updateJob(request, pk):
+    job = get_object_or_404(Job, id=pk)
 
-    args = {'user_id': request.user.id}
+    if job.user != request.user:
+        return Response({'message': 'You can not update this job'}, status=status.HTTP_403_FORBIDDEN)
 
-    jobs = CandidatesApplied.objects.filter(**args)
+    job.title = request.data['title']
+    job.description = request.data['description']
+    job.email = request.data['email']
+    job.address = request.data['address']
+    job.jobType = request.data['jobType']
+    job.education = request.data['education']
+    job.industry = request.data['industry']
+    job.experience = request.data['experience']
+    job.salary = request.data['salary']
+    job.positions = request.data['positions']
+    job.company = request.data['company']
 
-    serializer = CandidatesAppliedSerializer(jobs, many=True)
+    job.save()
+
+    serializer = JobSerializer(job, many=False)
 
     return Response(serializer.data)
+
+
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def applyToJob(request):
+
+#     args = {'user_id': request.user.id}
+
+#     jobs = CandidatesApplied.objects.filter(**args)
+
+#     serializer = CandidatesAppliedSerializer(jobs, many=True)
+
+#     return Response(serializer.data)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def isApplied(request, pk):
-
+    print('checking')
     user = request.user
 
     job = get_object_or_404(Job, id=pk)
-    applied = job.candidatesapplied._set.filter(user=user).exists()
+    applied = job.candidatesapplied_set.filter(user=user).exists()
     return Response(applied)
 
 
@@ -166,4 +192,13 @@ def getCandidatesApplied(request, pk):
 
     serializer = CandidatesAppliedSerializer(candidates, many=True)
 
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCurrentUserAppliedJobs(request):
+    args = {'user_id': request.user.id}
+    jobs = CandidatesApplied.objects.filter(**args)
+    serializer = CandidatesAppliedSerializer(jobs, many=True)
     return Response(serializer.data)
