@@ -4,10 +4,10 @@ A Full Stack Web Application made using Next.js and Django where users can post 
 
 # Screenshots of the project
 
-![alt-text](./screenshots/a.PNG)
-![alt-text](./screenshots/b.PNG)
-![alt-text](./screenshots/c.PNG)
-![alt-text](./screenshots/d.PNG)
-![alt-text](./screenshots/e.PNG)
-![alt-text](./screenshots/f.PNG)
-![alt-text](./screenshots/g.PNG)
+![alt-text](./frontend/screenshots/a.PNG)
+![alt-text](./frontend/screenshots/b.PNG)
+![alt-text](./frontend/screenshots/c.PNG)
+![alt-text](./frontend/screenshots/d.PNG)
+![alt-text](./frontend/screenshots/e.PNG)
+![alt-text](./frontend/screenshots/f.PNG)
+![alt-text](./frontend/screenshots/g.PNG)
